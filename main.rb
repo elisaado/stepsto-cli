@@ -1,0 +1,149 @@
+# This file is part of stepsto-cli
+require 'faraday'
+require 'json'
+
+if ARGV[0].to_s.strip.size == 0
+  puts "Usage: stepsto [command]"
+  puts "Commands:"
+  puts "  list -- List all available guides"
+  puts "  search [term] -- Search through the list of guides"
+  puts "  vearch [term] -- Search through the list of guides and view them"
+  puts "  view [guide name (aquired using search)] -- View Title, needed stuff, steps, and creator of a guide"
+  puts "  info -- View info about stepsto-cli and Steps To"
+  exit
+else
+  baseurl = 'https://stepsto.elisaado.com/api'
+  case ARGV[0].downcase
+  when 'list'
+    response_raw = Faraday.get("#{baseurl}/guides")
+    guides = JSON.parse(response_raw.body)['result']
+
+    guides.each do |guide|
+      puts "Name: #{guide['name']}"
+      puts "Title: #{guide['title']}"
+      puts "By: #{guide['by']}"
+      puts
+
+      puts "Needed stuff:"
+      guide['needed_stuff'].each do |needed_stuff|
+        puts "  * #{needed_stuff}"
+      end
+      puts
+
+      counter = 1
+      puts "Steps:"
+      guide['steps'].each do |step|
+        puts "  #{counter}. #{step}"
+        counter += 1
+      end
+      puts "\n\n"
+    end
+  when 'search'
+    if ARGV[1].to_s.strip.size > 0
+      term = ARGV[1].gsub(/ /, "%20")
+      response_raw = Faraday.get("#{baseurl}/guides/search/#{term}")
+      guides = JSON.parse(response_raw.body)['result']
+
+      if guides.to_a.size > 0
+        guides.each do |guide|
+          puts "Name: #{guide['name']}"
+          puts "Title: #{guide['title']}"
+          puts "By: #{guide['by']}"
+          puts
+        end
+      else
+        puts "No guides found using that search term..."
+      end
+    end
+  when 'vearch'
+    if ARGV[1].to_s.strip.size > 0
+      term = ARGV[1].gsub(/ /, "%20")
+      response_raw = Faraday.get("#{baseurl}/guides/search/#{term}")
+      guides = JSON.parse(response_raw.body)['result']
+
+      if guides.to_a.size > 0
+        guides.each do |guide|
+          puts "Name: #{guide['name']}"
+          puts "Title: #{guide['title']}"
+          puts "By: #{guide['by']}"
+          puts
+
+          puts "Needed stuff:"
+          guide['needed_stuff'].each do |needed_stuff|
+            puts "  * #{needed_stuff}"
+          end
+          puts
+
+          counter = 1
+          puts "Steps:"
+          guide['steps'].each do |step|
+            puts "  #{counter}. #{step}"
+            counter += 1
+          end
+          puts "\n\n"
+        end
+      else
+        puts "No guides found using that search term..."
+      end
+    else
+      puts "Usage: stepsto [command]"
+      puts "Commands:"
+      puts "  list -- List all available guides"
+      puts "  search [term] -- Search through the list of guides"
+      puts "  vearch [term] -- Search through the list of guides and view them"
+      puts "  view [guide name (aquired using search)] -- View Title, needed stuff, steps, and creator of a guide"
+      puts "  info -- View info about stepsto-cli and Steps To"
+    end
+  when 'view'
+    if ARGV[1].to_s.strip.size > 0
+      term = ARGV[1].gsub(/ /, "%20")
+      response_raw = Faraday.get("#{baseurl}/guides/#{term}")
+      guide = JSON.parse(response_raw.body)['result']
+
+      if guide.to_s.strip.size > 0
+        puts "Name: #{guide['name']}"
+        puts "Title: #{guide['title']}"
+        puts "By: #{guide['by']}"
+        puts
+
+        puts "Needed stuff:"
+        guide['needed_stuff'].each do |needed_stuff|
+          puts "  * #{needed_stuff}"
+        end
+        puts
+
+        counter = 1
+        puts "Steps:"
+        guide['steps'].each do |step|
+          puts "  #{counter}. #{step}"
+          counter += 1
+        end
+      else
+        puts "No guides found using that name..."
+      end
+    else
+      puts "Usage: stepsto [command]"
+      puts "Commands:"
+      puts "  list -- List all available guides"
+      puts "  search [term] -- Search through the list of guides"
+      puts "  vearch [term] -- Search through the list of guides and view them"
+      puts "  view [guide name (aquired using search)] -- View Title, needed stuff, steps, and creator of a guide"
+      puts "  info -- View info about stepsto-cli and Steps To"
+    end
+  when 'info'
+    puts "stepsto-cli:"
+    puts "  By: Eli Saado & contributors (https://github.com/elisaado/stepsto-cli/graphs/contributors)"
+    puts
+    puts "Steps To:"
+    puts "  Steps To is a website for sharing and reading guides, everyone can write and submit guides via GitHub, and if it is not a joke, it will be added."
+    puts
+    puts "  This project was made by Eli Saado to explore Ruby and Sinatra and also refresh his HTML and CSS"
+    puts
+    puts "  Contact:"
+    puts "    The creator of this project, Eli Saado, can be contacted in these ways: "
+    puts "    * Telegram: @pindanotly"
+    puts "    * Email: eli5saado@gmail.com"
+    puts
+    puts "  The contributors of this project can be found on GitHub (https://github.com/elisaado/steps-to/graphs/contributors)"
+  end
+end
