@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # This file is part of stepsto-cli
 require 'faraday'
 require 'json'
